@@ -12,7 +12,8 @@ import MissionsPage from './pages/MissionsPage';
 import NgoDashboard from './pages/NgoDashboard';
 import PlatformAdmin from './pages/PlatformAdmin';
 import ImpactFeed from './pages/ImpactFeed';
-import ImpactPassport from './pages/ImpactPassport'; // Use this for history
+import ImpactPassport from './pages/ImpactPassport';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
@@ -21,22 +22,21 @@ function App() {
         <Navbar />
         <div className="main-content">
           <Routes>
+            {/* The root path now shows the Landing Page first */}
+            <Route path="/" element={<LandingPage />} />
+
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
 
+            {/* Protected Routes */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/ngos" element={<ProtectedRoute><NgoBrowse /></ProtectedRoute>} />
-            <Route path="/donate/:ngoId" element={<ProtectedRoute><DonateForm /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><ImpactPassport /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/missions" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
             <Route path="/ngo-dashboard" element={<ProtectedRoute><NgoDashboard /></ProtectedRoute>} />
             <Route path="/platform-admin" element={<ProtectedRoute><PlatformAdmin /></ProtectedRoute>} />
             <Route path="/feed" element={<ProtectedRoute><ImpactFeed /></ProtectedRoute>} />
-
-            {/* Combined Impact Passport & Donation History */}
-            <Route path="/history" element={<ProtectedRoute><ImpactPassport /></ProtectedRoute>} />
-
-            <Route path="/" element={<LoginPage />} />
           </Routes>
         </div>
       </Router>
