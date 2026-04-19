@@ -2,18 +2,14 @@ import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { apiFetch } from '../utils/api';
-
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { user, login } = useContext(AuthContext);
     const navigate = useNavigate();
-
-    // AUTH GUARD: Redirect if already logged in
     useEffect(() => {
         if (user) navigate('/dashboard');
     }, [user, navigate]);
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -27,13 +23,11 @@ const LoginPage = () => {
             alert("Login Failed: " + err.message);
         }
     };
-
     return (
         <div className="auth-wrapper">
             <div className="auth-card">
                 <h2>Welcome Back</h2>
                 <p>Login to manage your impact.</p>
-
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <input
                         type="email"
@@ -51,7 +45,6 @@ const LoginPage = () => {
                     />
                     <button type="submit" className="auth-btn">Login</button>
                 </form>
-
                 <div className="auth-footer">
                     Don't have an account? <Link to="/signup">Sign up for free</Link>
                 </div>
@@ -59,5 +52,4 @@ const LoginPage = () => {
         </div>
     );
 };
-
 export default LoginPage;

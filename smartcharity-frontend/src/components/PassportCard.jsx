@@ -1,25 +1,21 @@
 const PassportCard = ({ user }) => {
-    // Check for id or userId
     const rawId = user.id || user.userId || "";
     const passportId = rawId ? `SC-${rawId.substring(0, 8).toUpperCase()}` : "SC-TEMP";
-
     return (
         <div style={styles.card}>
             <div style={styles.header}>
                 <div style={styles.logo}>SmartCharity</div>
                 <div style={styles.idTag}>VERIFIED DONOR</div>
             </div>
-
             <div style={styles.body}>
                 <div style={styles.info}>
-                    {/* The name should now correctly show "Pranav" */}
+                    {}
                     <h2 style={styles.name}>{user.name || "Donor"}</h2>
                     <p style={styles.label}>PASSPORT ID</p>
                     <code style={styles.value}>{passportId}</code>
                 </div>
                 <div style={styles.qrPlaceholder}>SC</div>
             </div>
-
             <div style={styles.stats}>
                 <div style={styles.statItem}>
                     <span style={styles.statLabel}>IMPACT POINTS</span>
@@ -33,7 +29,6 @@ const PassportCard = ({ user }) => {
         </div>
     );
 };
-
 const styles = {
     card: { width: '350px', background: 'linear-gradient(135deg, #1e1e1e 0%, #111 100%)', borderRadius: '20px', padding: '25px', border: '1px solid #333', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' },
     header: { display: 'flex', justifyContent: 'space-between', marginBottom: '25px' },
@@ -49,5 +44,4 @@ const styles = {
     statLabel: { display: 'block', color: '#555', fontSize: '0.6rem', marginBottom: '3px' },
     statValue: { color: 'white', fontWeight: 'bold', fontSize: '1rem' }
 };
-
 export default PassportCard;

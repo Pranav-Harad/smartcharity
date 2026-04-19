@@ -1,64 +1,120 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-
+import { LogOut, LayoutDashboard, Globe, MessageSquare, ShieldCheck, Trophy, Target } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
     const location = useLocation();
-
-    // Define paths where the Navbar should NEVER appear
-    const authPaths = ['/login', '/signup', '/'];
-
-    // Logic: Hide if user is logged out OR if we are on an auth page
-    if (!user || authPaths.includes(location.pathname)) {
-        return null;
-    }
-
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [profileName, setProfileName] = useState('');
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+    useEffect(() => {
+        if (user && user.userId) {
+            apiFetch(`/api/users/${user.userId}`)
+                .then(data => setProfileName(data.name || ''))
+                .catch(err => console.error("Failed to fetch user profile", err));
+        }
+    }, [user]);
+    const getInitials = (name) => {
+        if (!name) return '';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) {
+            return parts[0].charAt(0).toUpperCase();
+        }
+        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    };
+    const isLanding = location.pathname === '/';
+    const isAuth = ['/login', '/signup'].includes(location.pathname);
+    if (isAuth) return null;
     return (
-        <nav style={styles.nav}>
-            <div style={styles.logo}>
-                <Link to="/dashboard" style={styles.logoLink}>SmartCharity</Link>
-            </div>
-
-            <div style={styles.links}>
-                {/* 1. COMMON LINKS */}
-                <Link to="/dashboard" style={styles.link}>Dashboard</Link>
-                <Link to="/ngos" style={styles.link}>Browse NGOs</Link>
-                <Link to="/feed" style={styles.link}>Impact Feed</Link>
-
-                {/* 2. DONOR ONLY */}
-                {user.role === 'USER' && (
-                    <>
-                        <Link to="/history" style={styles.link}>Impact Passport</Link>
-                        <Link to="/leaderboard" style={styles.link}>Leaderboard</Link>
-                        <Link to="/missions" style={styles.link}>Missions</Link>
-                    </>
-                )}
-
-                {/* 3. NGO ADMIN */}
-                {user.role === 'NGO_ADMIN' && (
-                    <Link to="/ngo-dashboard" style={styles.adminLink}>NGO Portal</Link>
-                )}
-
-                {/* 4. SUPER ADMIN */}
-                {user.role === 'SUPER_ADMIN' && (
-                    <Link to="/platform-admin" style={styles.superAdminLink}>Platform Admin</Link>
-                )}
-
-                <button onClick={logout} style={styles.logoutBtn}>Logout</button>
+        <nav className={`navbar ${isScrolled || !isLanding ? 'navbar-scrolled' : ''}`}>
+            <div className="navbar-container">
+                <Link to="/" className="navbar-brand">
+                    <ShieldCheck className="text-primary" size={28} />
+                    <span>Smart<span className="text-gradient">Charity</span></span>
+                </Link>
+                <div className="navbar-links">
+                    {user ? (
+                        <>
+                            <NavLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
+                            <NavLink to="/ngos" icon={<Globe size={18} />} label="Browse" />
+                            <NavLink to="/feed" icon={<MessageSquare size={18} />} label="Impact" />
+                            {user.role === 'USER' && (
+                                <>
+                                    <NavLink to="/leaderboard" icon={<Trophy size={18} />} label="Leaders" />
+                                    <NavLink to="/missions" icon={<Target size={18} />} label="Missions" />
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            {isLanding ? (
+                                <>
+                                    <a href="#features" className="nav-link">Features</a>
+                                    <a href="#about" className="nav-link">About</a>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/#features" className="nav-link">Features</Link>
+                                    <Link to="/#about" className="nav-link">About</Link>
+                                </>
+                            )}
+                        </>
+                    )}
+                </div>
+                <div className="navbar-actions">
+                    {user ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            {profileName && (
+                                <div style={{
+                                    width: '38px',
+                                    height: '38px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--primary)',
+                                    color: 'var(--dark)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: '800',
+                                    fontSize: '1rem',
+                                    textTransform: 'uppercase',
+                                    boxShadow: '0 4px 10px rgba(202, 255, 51, 0.3)',
+                                    border: '2px solid rgba(255, 255, 255, 0.1)'
+                                }} title={profileName}>
+                                    {getInitials(profileName)}
+                                </div>
+                            )}
+                            <button onClick={logout} className="btn-logout">
+                                <LogOut size={16} />
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <Link to="/?auth=login" className="nav-link">Login</Link>
+                            <Link to="/?auth=signup" className="btn-get-started">Get Started</Link>
+                        </>
+                    )}
+                </div>
             </div>
         </nav>
     );
 };
-
-const styles = {
-    nav: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 40px', background: '#111', borderBottom: '1px solid #333', position: 'sticky', top: 0, zIndex: 1000 },
-    logoLink: { fontSize: '1.5rem', fontWeight: 'bold', color: '#4facfe', textDecoration: 'none', letterSpacing: '1px' },
-    links: { display: 'flex', alignItems: 'center', gap: '20px' },
-    link: { color: '#ccc', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '500', transition: 'color 0.2s' },
-    adminLink: { color: '#fbbf24', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 'bold', border: '1px solid #fbbf24', padding: '6px 12px', borderRadius: '6px' },
-    superAdminLink: { color: '#4facfe', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 'bold', border: '1px solid #4facfe', padding: '6px 12px', borderRadius: '6px' },
-    logoutBtn: { background: '#ef4444', color: 'white', border: 'none', padding: '8px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', marginLeft: '10px' }
+const NavLink = ({ to, icon, label }) => {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+    return (
+        <Link to={to} className={`nav-link ${isActive ? 'active' : ''}`}>
+            {icon}
+            <span>{label}</span>
+        </Link>
+    );
 };
-
 export default Navbar;
